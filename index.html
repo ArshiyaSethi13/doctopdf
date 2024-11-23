@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Docx to PDF Converter</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+            text-align: center;
+        }
+        input[type="file"], input[type="text"], button {
+            margin: 10px 0;
+        }
+        .metadata {
+            margin: 20px 0;
+        }
+        .download-link {
+            color: blue;
+            text-decoration: underline;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Docx to PDF Converter</h1>
+        <form id="uploadForm" method="POST" enctype="multipart/form-data" action="/upload">
+            <input type="file" name="file" accept=".docx" required><br>
+            <input type="text" name="password" placeholder="Password (optional)"><br>
+            <button type="submit">Convert to PDF</button>
+        </form>
+        <div class="metadata" id="metadata"></div>
+        <div class="download-link" id="downloadLink"></div>
+    </div>
+    <script>
+        const form = document.getElementById('uploadForm');
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const formData = new FormData(form);
+            const response = await fetch('/upload', {
+                method: 'POST',
+                body: formData
+            });
+            const result = await response.json();
+            if (result.error) {
+                alert(`Error: ${result.error}`);
+            } else {
+                document.getElementById('metadata').innerHTML = `
+                    <h3>Metadata</h3>
+                    <p>Title: ${result.metadata.title || 'N/A'}</p>
+                    <p>Author: ${result.metadata.author || 'N/A'}</p>
+                    <p>Created: ${result.metadata.created || 'N/A'}</p>
+                    <p>Last Modified: ${result.metadata.last_modified || 'N/A'}</p>
+                `;
+                document.getElementById('downloadLink').innerHTML = `
+                    <a href="${result.download_url}" target="_blank">Download PDF</a>
+                `;
+            }
+        });
+    </script>
+</body>
+</html>
